@@ -69,6 +69,7 @@ app.patch("/edit", async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(id, changes, {
       returnDocument: "after",
+      runValidators: true,
     });
     res.send(user);
   } catch (err) {

@@ -21,8 +21,8 @@ app.post("/signup", async (req, res) => {
       await user.save();
       res.send("data saved");
     }
-  } catch {
-    res.status(400).send("Error saving user");
+  } catch(err) {
+    res.status(400).send(err.message);
   }
 });
 
@@ -55,25 +55,22 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/edit", async (req, res) => {
-  const id = req.body.id;
-  // const changes = {
-  //   firstName: req.body.firstName,
-  //   lastName: req.body.lastName,
-  //   emailId: req.body.emailId,
-  //   password: req.body.password,
-  //   age: req.body.age,
-  //   gender: req.body.gender,
-  // };
+app.patch("/edit/:id", async (req, res) => {
+  const id = req.params?.id;
   const changes = req.body;
   try {
+    const ALLOWED_UPDATES = ["firstName", "lastName", "age", "gender"];
+    const isUpdateAllowed = Object.keys(changes).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+    if (!isUpdateAllowed) throw new Error("Update not allowed");
     const user = await User.findByIdAndUpdate(id, changes, {
       returnDocument: "after",
       runValidators: true,
     });
     res.send(user);
   } catch (err) {
-    res.status(400).send(err);
+    res.status(400).send(err.message);
   }
 });
 

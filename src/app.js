@@ -2,6 +2,8 @@ import express from "express";
 import connectDB from "./config/database.js";
 import dotenv from "dotenv";
 import User from "./models/user.js";
+import bcrypt from "bcrypt";
+import { validateSignUpData } from "./utils/validation.js";
 
 dotenv.config();
 
@@ -12,17 +14,31 @@ app.use(express.json());
 connectDB();
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-  const existingUser = await User.findOne({ emailId: req.body.emailId });
   try {
+    // Validation
+    validateSignUpData(req);
+    //Encrypt password
+    const { firstName, lastName, emailId, age, gender } = req.body;
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: hashedPassword,
+      age,
+      gender,
+    });
+    const existingUser = await User.findOne({ emailId: req.body.emailId });
+
     if (existingUser) {
       return res.status(400).send("User already found with same emailId");
     } else {
       await user.save();
       res.send("data saved");
     }
-  } catch(err) {
-    res.status(400).send(err.message);
+  } catch (err) {
+    res.status(400).send("ERROR : " + err.message);
   }
 });
 

@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import validator from "validator";
 
 const userSchema = new mongoose.Schema(
   {
@@ -21,16 +20,10 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      validate(value) {
-        if (!validator.isEmail(value))
-          throw new Error("Invalid Email format : " + value);
-      },
     },
     password: {
       type: String,
       required: true,
-      minLength: 6,
-      maxLength: 16,
     },
     age: {
       type: Number,
@@ -41,13 +34,7 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       required: true,
-      validate: {
-        validator: function (value) {
-          return ["male", "female"].includes(value);
-        },
-        message: "There are only 2 genders (male & female)",
-      },
-      default: "male",
+      default: "other",
     },
   },
   {
